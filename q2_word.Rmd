@@ -210,7 +210,8 @@ Activities with significant increases in beneficiaries reached compared to Q1 in
 ```{r table-activity}
 fsc %>% 
   group_by(quarter, activity_red) %>% 
-  summarise(beneficiaries = sum(new_beneficiaries)) %>%  
+  summarise(beneficiaries = sum(new_beneficiaries), 
+            .groups = "drop") %>%  
   pivot_wider(values_from = beneficiaries, names_from = quarter, values_fill = 0) %>% 
   mutate(`%_change` = round((q2 - q1) / q1 * 100, digits = 2), 
          `%_change` = ifelse(is.infinite(`%_change`), 0, `%_change`), 
@@ -563,27 +564,46 @@ fsc %>%
 
 ### 2.1 Progress by activity
 
-The first grey line below shows the the approval of the IERP in June 2021 and the red line shows the start of 2022. 
+The dotted red line shows the end of Q1 and the dotted blue line shows the end of Q2. The thick line in grey shows the progress in 2021 for the same activity. It is observed that food distributions in 2022 greatly outpaced those in 2021. The same is also true for cash/work for food/assets and crop, vegetable and seed kits. 
 
 ```{r progress-facet-lineplot}
+
+act_line_2021 <- fsc_2021 %>% 
+  filter(unique_beneficiaries == "Yes") %>%
+  mutate(date = date + years(1)) %>% 
+  group_by(activity_red) %>% 
+  arrange(date) %>% 
+  mutate(cum_ben = cumsum(beneficiaries)) %>% 
+  mutate(activity_red = str_replace_all(activity_red, "provision of ", "")) %>% 
+  filter(activity_red %out% c("fishery kits", 
+                              "community infrastructure and equipment"))
+
 fsc %>% 
   group_by(date, activity_red) %>% 
   summarise(beneficiaries = sum(beneficiaries)) %>% 
-  rbind(fsc_2021 %>% 
-          # filter(unique_beneficiaries == "Yes") %>%
-          group_by(date, activity_red) %>% 
-          summarise(beneficiaries = sum(beneficiaries))) %>% 
+  # rbind(fsc_2021 %>% 
+  #         # filter(unique_beneficiaries == "Yes") %>%
+  #         group_by(date, activity_red) %>% 
+  #         summarise(beneficiaries = sum(beneficiaries))) %>% 
   group_by(activity_red) %>% 
   arrange(date) %>% 
   mutate(cum_ben = cumsum(beneficiaries)) %>% 
   arrange(activity_red) %>% 
   mutate(activity_red = str_replace_all(activity_red, "provision of ", "")) %>%
+  filter(activity_red %out% c("fishery kits", 
+                              "community infrastructure and equipment")) %>% 
   ggplot(aes(x = date, y = cum_ben, colour = activity_red)) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-01-01")), alpha = 0.5) +
-  geom_vline(colour = "black", lty = 2, xintercept = as.numeric(as.Date("2021-06-01")), alpha = 0.5) +
-  geom_step(size = 0.6) +
-  scale_x_date(date_breaks = "6 months", date_labels = "%b%y") +
+  geom_step(data = act_line_2021, 
+            aes(x = date, 
+                y = cum_ben), 
+            colour = "grey",
+            size = 2, 
+            alpha = .4) + 
+  geom_step(size = 1) + 
+  scale_x_date(date_breaks = "1 month", date_labels = "%b%y") +
   scale_y_continuous(labels = comma) +
+  geom_vline(colour = "blue", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   facet_wrap(~ activity_red, scales = "free_y") +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 5, angle = 60, hjust = 1, vjust = 1), 
@@ -593,11 +613,12 @@ fsc %>%
   labs(x = "Month", 
        y = "Cumulative beneficiary frequencies", 
        title = "Monthly progress by activity, 2021 - 2022 (Q2)",
-       subtitle = "Figures are in cumulative beneficiary frequencies reached") + 
+       subtitle = "Figures are in cumulative beneficiary frequencies reached; grey line is 2021 progress") + 
   theme(plot.title = element_text(size = 12)) 
   
 
 ```
+
 <br>
 
 Newly implemented in Q2 of 2022 was the provision of HEB and fortified rice, largely in Chin state. Food distributions continued to be the largest activity, followed by the provision of crop, vegetable and seed kits. 
@@ -1338,7 +1359,7 @@ ggplotly(partner_scatter, tooltip = c("text"), width = 820) %>%
 
 ### 5.2 Monthly progress by partner
 
-Organisations such as 9693, 1206, 5440, 9566 and 6197 have implemented all or almost all their activities in 2022. 
+Organisations 6197, 2690 and 5722 have implemented the majority of their activities in the second quarter of 2022. The thick grey line shows an organisation's progress from last year. 
 
 <br>
 
@@ -1347,35 +1368,52 @@ Organisations such as 9693, 1206, 5440, 9566 and 6197 have implemented all or al
 partner_top <- fsc %>% 
   sum_ben(org_code) %>% arrange(desc(beneficiaries)) %>%  mutate(org_code = reorder(org_code, -beneficiaries)) %>% pull(org_code) %>% head(12)
 
+line_2021 <- fsc_2021 %>% 
+  filter(unique_beneficiaries == "Yes") %>%
+  filter(org_code %in% partner_top) %>% 
+  select(date, org_code, beneficiaries, location, admin3_pcode) %>% 
+  mutate(date = date + years(1)) %>% 
+  group_by(location, admin3_pcode) %>% 
+  slice(which.max(beneficiaries)) %>% 
+  group_by(org_code) %>% 
+  arrange(date) %>% 
+  mutate(cum_ben = cumsum(beneficiaries))
+
 fsc %>%
   filter(org_code %in% partner_top) %>%
   select(date, org_code, beneficiaries = new_beneficiaries, location, admin3_pcode) %>% 
-  rbind(fsc_2021 %>% 
-          filter(unique_beneficiaries == "Yes") %>% 
-          filter(org_code %in% partner_top) %>% 
-          select(date, org_code, beneficiaries, location, admin3_pcode)) %>% 
+  # rbind(fsc_2021 %>% 
+  #         filter(unique_beneficiaries == "Yes") %>% 
+  #         filter(org_code %in% partner_top) %>% 
+  #         select(date, org_code, beneficiaries, location, admin3_pcode)) %>% 
   group_by(location, admin3_pcode) %>% 
   slice(which.max(beneficiaries)) %>% 
   group_by(org_code) %>% 
   arrange(date) %>% 
   mutate(cum_ben = cumsum(beneficiaries)) %>% 
   ggplot(aes(x = date, y = cum_ben)) +
-  geom_step(size = 0.5) + 
-  scale_x_date(date_breaks = "6 months", date_labels = "%b%y") +
+  geom_step(data = line_2021, 
+            aes(x = date, 
+                y = cum_ben), 
+            colour = "grey",
+            size = 2, 
+            alpha = .4) + 
+  geom_step(size = 0.7) + 
+  scale_x_date(date_breaks = "1 month", date_labels = "%b%y") +
   scale_y_continuous(labels = comma) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2021-06-01")), alpha = .5) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-01-01")), alpha = .5) +
+  geom_vline(colour = "blue", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   facet_wrap(~ fct_rev(fct_reorder(org_code, cum_ben, max)), scales = "free_y") +
   theme(legend.position = "none",
-        axis.text.x = element_text(size = 4, angle = 60, hjust = 1, vjust = 1),
-        axis.text.y = element_text(size = 4),
-        strip.text = element_text(size = 7, face = "bold"),
+        axis.text.x = element_text(size = 5, angle = 60, hjust = 1, vjust = 1),
+        axis.text.y = element_text(size = 5),
+        strip.text = element_text(size = 8, face = "bold"),
         strip.background = element_rect(fill = "#212121"),
         plot.title = element_text(size = 11)) + # see if this works when you knit, then do it for the other plots 
   labs(x = "Date", 
        y = "Cumulative beneficiaries", 
-       title = "Monthly progress of top 12 implementing partners, 2021 - 2022 (Q2)", 
-       subtitle = "Figures show cumulative unique beneficiaries; first red line is the IERP, second is the start of 2022") 
+       title = "Monthly progress of top 12 implementing partners, 2022 Q1 & Q2", 
+       subtitle = "Figures show cumulative unique beneficiaries; previous year's progress in grey") 
 
 # ggsave("partner_facet_line.png", dpi = 300, height = 5, width = 8, units = "in")  
 ```
@@ -1389,23 +1427,18 @@ The table below lists the top 15 partners by number of beneficiaries reached in 
 
 ```{r}
 fsc %>%
-  select(date, org_code, beneficiaries = new_beneficiaries, location, admin3_pcode) %>% 
-  rbind(fsc_2021 %>% 
-          filter(unique_beneficiaries == "Yes") %>% 
-          select(date, org_code, beneficiaries, location, admin3_pcode)) %>% 
   group_by(location, admin3_pcode) %>% 
   slice(which.max(beneficiaries)) %>% 
-  group_by(org_code, year = year(date)) %>% 
-  summarise(beneficiaries = sum(beneficiaries), 
-            .groups = "drop") %>%
-  pivot_wider(names_from = year, values_from = beneficiaries, names_prefix = "ben_") %>% 
+  group_by(org_code, quarter) %>% 
+  summarise(beneficiaries = sum(beneficiaries)) %>%
+  pivot_wider(names_from = quarter, values_from = beneficiaries, names_prefix = "ben_") %>% 
   rowwise() %>% 
-  mutate(total_ben = sum(ben_2021, ben_2022, na.rm = TRUE)) %>% 
+  mutate(total_ben = sum(ben_q1, ben_q2, na.rm = TRUE)) %>% 
   ungroup() %>% 
-  mutate(rank_2021 = dense_rank(-ben_2021), 
-         rank_2022 = dense_rank(-ben_2022)) %>% 
-  arrange(desc(ben_2022)) %>% 
-  select(org_code, ben_2021, rank_2021, ben_2022, rank_2022, total_ben) %>% 
+  mutate(rank_q1 = dense_rank(-ben_q1), 
+         rank_q2 = dense_rank(-ben_q2)) %>% 
+  arrange(desc(total_ben)) %>% 
+  select(org_code, ben_q1, rank_q1, ben_q2, rank_q2, total_ben) %>% 
   head(15) %>% 
   pander(caption = "Top implementing partners by beneficiaries reached in 2022 (Q1 & Q2)", 
          style = "grid")
