@@ -1,0 +1,30 @@
+"0","fsc %>% 
+  filter(activity_red %in% c(""crop, vegetable and seed kits"", 
+                                                            ""FFS and farmer training"", 
+                                                            ""IGA and small grants"", 
+                                                            ""livestock kits"")) %>% 
+  group_by(activity_red, quarter) %>% 
+  summarise(beneficiaries = sum(beneficiaries)) %>% 
+  group_by(quarter) %>% 
+  mutate(`%beneficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2), 
+         quarter = recode(quarter, 
+                          ""q1"" = ""Quarter_1"", 
+                          ""q2"" = ""Quarter_2""), 
+         ) %>% 
+  ggplot(aes(x = beneficiaries, y = activity_red, fill = activity_red)) + 
+  geom_col(position = position_dodge(width = .9)) + 
+  geom_text(aes(label = comma(beneficiaries)), 
+            position = position_dodge(width = .9), 
+            hjust = ""inward"") +
+  facet_wrap(~ quarter) +
+  labs(x = ""Number of beneficiary frequencies"", 
+       y = """", 
+       fill = ""agricultural\nactivity"",
+       title = ""Beneficiaries reached by agriculture and livelihoods activities"") +
+  scale_x_continuous(labels = number_format(scale = 1 / 1000, suffix = ""K"")) +
+  theme(legend.position = ""none"", 
+        strip.text = element_text(size = 10, face = ""bold""),
+        strip.background = element_rect(fill = ""#212121""))
+"
+"2","`summarise()` has grouped output by 'activity_red'. You can override using the `.groups` argument.
+"

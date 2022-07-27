@@ -1,0 +1,30 @@
+"0","fsc %>%
+  filter(!is.na(usd_per_hhd) & !is.na(new_beneficiaries)) %>% 
+  filter(delivery_modality %in% c(""CBT/CVA"", ""Hybrid (In-kind & CBT/CVA)"")) %>%
+  group_by(usd_hhd_bin, quarter) %>% 
+  summarise(households = sum(households)) %>% 
+  group_by(quarter) %>% 
+  mutate(`%_of_hhd` = round(households / sum(households) * 100, digits = 2)) %>% 
+  ungroup() %>% 
+  mutate(quarter = recode(quarter,
+                          ""q1"" = ""Quarter_1"", 
+                          ""q2"" = ""Quarter_2"")) %>%  
+  mutate(usd_hhd_bin = fct_relevel(usd_hhd_bin, c(""<$10"", "">=$10_<$20"", "">=$20_<$30"", "">=$30_<$40"", "">=$40_<$50"","">=$50_<$60"", 
+                                                  "">=$60_<$70"", "">=$70_<$80"", "">=$80_<$90"","">=$90_<$100"","">=$100""))) %>% 
+  ggplot(aes(x = usd_hhd_bin, y = households, fill = usd_hhd_bin)) + 
+  geom_col() + 
+  geom_text(aes(label = `%_of_hhd`), vjust = -0.4, size = 3) + 
+  facet_wrap(~ quarter) + 
+  scale_fill_viridis_d(option = ""mako"", direction = -1) + 
+  scale_y_continuous(labels = comma, breaks = seq(0, 80000, by = 10000)) + 
+  theme(legend.position = ""none"", 
+        axis.text.x = element_text(angle = 30, hjust = 0.8, vjust = 0.9), 
+        strip.text = element_text(size = 8, face = ""bold""),
+        strip.background = element_rect(fill = ""#212121"")) +
+  labs(x = ""USD value of cash transfer per household per month"",
+       y = ""Number of households"",
+       title = ""Number of households by value of cash transfer per household (2022/Q1)"",
+       subtitle = ""Figures at the top of each bar show percentage of households\nOnly households reached through the cash, hybrid or voucher modalities are included"")
+"
+"2","`summarise()` has grouped output by 'usd_hhd_bin'. You can override using the `.groups` argument.
+"

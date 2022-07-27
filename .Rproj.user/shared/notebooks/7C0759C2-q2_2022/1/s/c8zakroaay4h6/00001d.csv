@@ -1,0 +1,8 @@
+"0","state_list %>% 
+  filter(quarter == ""q2"" & state %in% c(""Yangon"", ""Rakhine"")) %>% 
+  summarise_at(""pc"", sum) %>% pull(pc)
+"
+"1","[1]"
+"1"," 66.24"
+"1","
+"

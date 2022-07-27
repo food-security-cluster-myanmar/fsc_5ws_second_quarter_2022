@@ -1,0 +1,23 @@
+"0","fsc %>%
+  select(date, org_code, beneficiaries = new_beneficiaries, location, admin3_pcode) %>% 
+  rbind(fsc_2021 %>% 
+          filter(unique_beneficiaries == ""Yes"") %>% 
+          select(date, org_code, beneficiaries, location, admin3_pcode)) %>% 
+  group_by(location, admin3_pcode) %>% 
+  slice(which.max(beneficiaries)) %>% 
+  group_by(org_code, year = year(date)) %>% 
+  summarise(beneficiaries = sum(beneficiaries)) %>%
+  pivot_wider(names_from = year, values_from = beneficiaries, names_prefix = ""ben_"") %>% 
+  rowwise() %>% 
+  mutate(total_ben = sum(ben_2021, ben_2022, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  mutate(rank_2021 = dense_rank(-ben_2021), 
+         rank_2022 = dense_rank(-ben_2022)) %>% 
+  arrange(desc(ben_2022)) %>% 
+  select(org_code, ben_2021, rank_2021, ben_2022, rank_2022, total_ben) %>% 
+  head(15) %>% 
+  kable(caption = ""Top implementing partners by beneficiaries reached in 2022 (Q1 & Q2)"", format.args = list(big.mark = "","")) %>% 
+  kable_classic_2(""striped"") 
+"
+"2","`summarise()` has grouped output by 'org_code'. You can override using the `.groups` argument.
+"

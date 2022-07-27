@@ -1,0 +1,9 @@
+"0","ggplotly(partner_scatter, tooltip = c(""text""), width = 820) %>%
+  config(displayModeBar = FALSE) %>% 
+  layout(title = list(text = paste0(""Beneficiaries and townships reached, by implementing partner"",
+                                    ""<br>"", 
+                                    ""<sup>"",
+                                    ""mouse over for details; sizes indicate beneficiaries reached; red lines are means"",
+                                    ""</sup>"")))
+"
+"2","Warning: Transformation introduced infinite values in continuous x-axis"

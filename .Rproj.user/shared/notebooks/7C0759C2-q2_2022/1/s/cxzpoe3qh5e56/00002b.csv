@@ -1,0 +1,14 @@
+"0","fsc %>% 
+  filter(str_detect(activity, ""food distribution"")) %>% 
+  group_by(activity, beneficiary_type) %>% 
+  mutate(activity = str_extract(activity, ""\\, \\w+$""), 
+         activity = str_to_title(str_replace(activity, "", "", """"))) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  pivot_wider(names_from = activity, values_from = beneficiaries, values_fill = 0) %>% 
+  adorn_totals(c(""row"", ""col"")) %>% 
+  kable(caption = ""Food distributions by type food insecurity status and beneficiary type"", 
+        format.args = list(big.mark = "","")) %>% 
+  kable_classic_2(""striped"")
+"
+"2","`summarise()` has grouped output by 'activity'. You can override using the `.groups` argument.
+"

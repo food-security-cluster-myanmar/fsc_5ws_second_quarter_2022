@@ -1,0 +1,21 @@
+"0","fsc %>% 
+  group_by(state, quarter) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
+  mutate(quarter = recode(quarter, 
+                          ""q1"" = ""Quarter_1"", 
+                          ""q2"" = ""Quarter_2"")) %>% 
+  ggplot(aes(x = beneficiaries, y = fct_reorder(state, beneficiaries))) + 
+  geom_col(aes(fill = state)) + 
+  facet_row(vars(quarter), scales = ""free_x"", space = ""free"") + 
+  scale_x_continuous(labels = number_format(scale = 1 / 1000, suffix = ""K"")) + 
+  guides(fill = ""none"") +
+  geom_text(aes(label = comma(beneficiaries)), hjust = ""inward"", size = 4) + 
+  labs(x = ""Number of new beneficiaries reached"", 
+       y = """", 
+       title = ""New beneficiaries reached by quarter"") + 
+  theme(legend.position = ""none"",
+        strip.text = element_text(size = 10, face = ""bold""),
+        strip.background = element_rect(fill = ""#212121""))
+"
+"2","`summarise()` has grouped output by 'state'. You can override using the `.groups` argument.
+"

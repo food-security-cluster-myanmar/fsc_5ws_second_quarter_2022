@@ -1,0 +1,28 @@
+"0","fsc %>% 
+  mutate(agricultural_activity = ifelse(activity_red %in% c(""crop, vegetable and seed kits"", 
+                                                            ""FFS and farmer training"", 
+                                                            ""IGA and small grants"", 
+                                                            ""livestock kits""), ""yes"", ""no""), 
+         quarter = recode(quarter, 
+                          ""q1"" = ""One"", 
+                          ""q2"" = ""Two"")) %>% 
+  group_by(agricultural_activity, quarter) %>% 
+  summarise(beneficiaries = sum(beneficiaries)) %>% 
+  group_by(quarter) %>% 
+  mutate(`%beneficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2), 
+         agricultural_activity = fct_rev(agricultural_activity)) %>% 
+  arrange(quarter, agricultural_activity) %>% 
+  ggplot(aes(x = beneficiaries, y = fct_rev(quarter), fill = agricultural_activity)) + 
+  geom_col(position = position_dodge(width = .9)) + 
+  geom_text(aes(label = `%beneficiaries`), 
+            position = position_dodge(width = .9), 
+            hjust = ""inward"") +
+  scale_fill_manual(values = c(""#D35400"", ""#76D7C4"")) +
+  labs(x = ""Number of beneficiary frequencies"", 
+       y = ""Quarter"", 
+       fill = ""agricultural\nactivity"",
+       title = ""Beneficiaries reached by agriculture and livelihoods activities"") +
+  scale_x_continuous(labels = comma)
+"
+"2","`summarise()` has grouped output by 'agricultural_activity'. You can override using the `.groups` argument.
+"
