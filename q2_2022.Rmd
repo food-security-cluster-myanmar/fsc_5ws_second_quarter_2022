@@ -149,6 +149,12 @@ pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_25
 
 ```
 
+
+[Food Security Cluster Myanmar homepage](https://food-security-cluster-myanmar.github.io/)
+
+<br>
+
+
 ## Summary of achievements
 
 Beneficiaries of humanitarian action formed `r round(filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)`% of the `r sum(fsc$new_beneficiaries) %>% format(big.mark = ",")` beneficiaries in the first quarter of 2022. The remainder were reached through development interventions.
@@ -620,7 +626,7 @@ fsc %>%
         strip.background = element_rect(fill = "#212121")) + 
   labs(x = "Month", 
        y = "Cumulative beneficiary frequencies", 
-       title = "Monthly progress by activity, 2021 - 2022 (Q2)",
+       title = "Monthly progress by activity, 2022 Q1 & Q2",
        subtitle = "Figures are in cumulative beneficiary frequencies reached; grey line is 2021 progress") + 
   theme(plot.title = element_text(size = 12)) 
   
