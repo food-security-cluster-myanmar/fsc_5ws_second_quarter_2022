@@ -93,7 +93,8 @@ sum_ben <- function(df, column_var){
   
   df %>%
     group_by(!!column_var) %>% # must add bang-bang
-    summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE)) %>% 
+    summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE), 
+              .groups = "drop") %>% 
     arrange(desc(beneficiaries)) 
     
 }
@@ -106,7 +107,8 @@ sum_ben2 <- function(df, column_var1, column_var2){
   
   df %>%
     group_by(!!column_var1, !!column_var2) %>% # must add bang-bang
-    summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE), .groups = "drop") 
+    summarise(beneficiaries = sum(new_beneficiaries, na.rm = TRUE), 
+              .groups = "drop") 
     
 }
 
@@ -130,9 +132,14 @@ fsc_2021 <- read_csv("./data/fsc_2021.csv")
 pin <- read_csv("./data/fs_pin.csv")
 
 hd_list <- fsc %>% 
-  group_by(humanitarian_or_development) %>%
+  group_by(humanitarian_or_development, activity_red) %>%
   summarise(beneficiaries = sum(new_beneficiaries)) %>% 
-  adorn_totals("row") %>% 
+  mutate(hd = ifelse(humanitarian_or_development == "Humanitarian" |
+                       activity_red == "food distribution", 
+                     "Humanitarian", 
+                     "Development")) %>% 
+  group_by(hd) %>% 
+  summarise_at("beneficiaries", sum) %>%
   mutate(pc = round(beneficiaries / sum(beneficiaries) * 100, digits = 2))
 
 # shapefiles
@@ -165,13 +172,13 @@ To recall, the Food Security Cluster's strategic objectives for 2022 are:
 -   SO2: Vulnerable persons (excl. IDPs) have equitable access to sufficient, safe and nutritious food (either in-kind or through food assistance)
 -   SO3: Restore, protect and improve livelihoods and resilience
 
-Overall, `r hd_list %>% filter(humanitarian_or_development == "Humanitarian") %>% pull(pc)`% of the food security cluster's beneficiaries were from humanitarian activities.
+Overall, `r hd_list %>% filter(hd == "Humanitarian") %>% pull(pc)`% of the food security cluster's beneficiaries were from humanitarian activities.
 
 <br>
 
 ```{r table-so-humanitarian}
 fsc %>%  
-  filter(humanitarian_or_development == "Humanitarian") %>% 
+  filter(humanitarian_or_development == "Humanitarian" | activity_red == "food distribution") %>% 
   group_by(so, quarter) %>% 
   summarise(beneficiaries = sum(new_beneficiaries), .groups = "drop") %>% 
   pivot_wider(names_from = quarter, 
@@ -195,14 +202,14 @@ fsc %>%
 
 <br>
 
-A total of `r hd_list %>% filter(humanitarian_or_development == "Development") %>% pull(pc)`% beneficiaries were from development activities and actors.
+A total of `r hd_list %>% filter(hd == "Development") %>% pull(pc)`% beneficiaries were from development activities and actors.
 
 <br>
 
 ```{r table-so-development}
 
 fsc %>%  
-  filter(humanitarian_or_development == "Development") %>% 
+  filter(humanitarian_or_development == "Development" & activity_red != "food distribution") %>% 
   group_by(so, quarter) %>% 
   summarise(beneficiaries = sum(new_beneficiaries), .groups = "drop") %>% 
   pivot_wider(names_from = quarter, 
@@ -251,11 +258,12 @@ fsc %>%
                                activity_red,
                                str_to_sentence(activity_red))) %>% 
   rename(Q1 = q1, Q2 = q2, 
-         Activity = activity_red) %>% 
-  arrange(desc(Q2)) %>% 
+         Activity = activity_red) %>%
   mutate(Total = Q1 + Q2) %>% 
+  arrange(desc(Total)) %>% 
   kable(caption = "Beneficiaries by activity, Q1 & Q2 2022", format.args = list(big.mark = ",")) %>% 
   kable_classic_2("striped")
+
 
 ```
 
@@ -445,6 +453,8 @@ fsc %>%
   labs(title = "Beneficiaries by township, as of 2022-06-30", 
        subtitle = "Townships in grey do not have any partners present", 
        fill = "Beneficiaries")  
+
+# ggsave("./maps_q1_q2.png", dpi = 300, height = 9, width = 8, units = "in")
   
 ```
 
@@ -578,7 +588,9 @@ fsc %>%
 
 ### 2.1 Progress by activity
 
-The dotted red line shows the end of Q1 and the dotted blue line shows the end of Q2. The thick line in grey shows the progress in 2021 for the same activity. It is observed that food distributions in 2022 greatly outpaced those in 2021. The same is also true for cash/work for food/assets and crop, vegetable and seed kits. 
+The first dotted red line shows the end of Q1 and the second shows the end of Q2. The thick line in grey shows the progress in 2021 for the same activity. It is observed that food distributions in 2022 greatly outpaced those in 2021. The same is also true for cash/work for food/assets and crop, vegetable and seed kits. 
+
+<br>
 
 ```{r progress-facet-lineplot}
 
@@ -613,11 +625,11 @@ fsc %>%
             colour = "grey",
             size = 2, 
             alpha = .4) + 
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   geom_step(size = 1) + 
   scale_x_date(date_breaks = "1 month", date_labels = "%b%y") +
   scale_y_continuous(labels = comma) +
-  geom_vline(colour = "blue", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   facet_wrap(~ activity_red, scales = "free_y") +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 5, angle = 60, hjust = 1, vjust = 1), 
@@ -627,9 +639,10 @@ fsc %>%
   labs(x = "Month", 
        y = "Cumulative beneficiary frequencies", 
        title = "Monthly progress by activity, 2022 Q1 & Q2",
-       subtitle = "Figures are in cumulative beneficiary frequencies reached; grey line is 2021 progress") + 
+       subtitle = "Figures are in cumulative beneficiary frequencies reached; previous year's progress is in grey") + 
   theme(plot.title = element_text(size = 12)) 
   
+# ggsave("activity_facet_line.png", dpi = 300, height = 5, width = 8, units = "in")  
 
 ```
 
@@ -670,7 +683,10 @@ fsc %>%
        y = "Quarter", 
        fill = "agricultural\nactivity",
        title = "Beneficiaries reached by agriculture and livelihoods activities") +
-  scale_x_continuous(labels = comma)
+  scale_x_continuous(labels = comma, 
+                     breaks = c(100000, 250000, 
+                                500000, 1000000, 
+                                2000000, 3000000))
 
 ```
 
@@ -759,7 +775,7 @@ There are also clear differences between the different beneficiary types and the
 
 <br>
 
-```{r facet-ben-type}
+```{r facet-ben-type, fig.height=6}
 
 fsc %>%  
    mutate(delivery_modality = case_when(str_detect(delivery_modality, "Hybrid") ~ "Hybrid", 
@@ -987,7 +1003,7 @@ Kachin, Rakhine and Shan notably have several extreme outliers much higher than 
 
 The table below compares the different bins for cash transfer values of food distributions with the minimum expenditure basket for food established by the Cash Working Group. They have established a floor of MMK 190,555 (or USD 114.55).
 
-Overall, `r round((filter(fsc, usd_per_person >= (114.55 / 5) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) / (filter(fsc, !is.na(usd_per_person) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) * 100, digits = 2)`% of food distribution beneficiaries have received at least 100% of the MEB and `r round((filter(fsc, usd_per_person >= (114.55 / 5 / 2) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) / (filter(fsc, !is.na(usd_per_person) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) * 100, digits = 2)`% have received at least 50% of the MEB.
+Overall, `r round((filter(fsc, usd_per_person >= (114.55 / 5) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) / (filter(fsc, !is.na(usd_per_person) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) * 100, digits = 2)`% of food distribution beneficiaries have received at least 100% of the MEB and `r round((filter(fsc, usd_per_person >= (114.55 / 5 / 2) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) / (filter(fsc, !is.na(usd_per_person) & activity_red == "food distribution") %>% {sum(.$new_beneficiaries)}) * 100, digits = 2)`% have received at least 50% of the MEB (USD 11.45 per person).
 
 <br>
 
@@ -1236,11 +1252,12 @@ fsc_disagg %>%
   filter(sd <= 1) %>% 
   ggplot(aes(x = sd)) + 
   geom_histogram(binwidth = .02) + 
+  geom_vline(xintercept = .05, lty = 2, colour = "red") +
   scale_x_continuous(labels = percent_format(accuracy = 1), 
                      breaks = seq(0, 1, by = .2)) +
   labs(x = "Percentage difference from group mean", 
        title = "Histogram of standard deviations across beneficiary disaggregations", 
-       subtitle = "The lower the standard deviation, the more likely the value is to be copy/pasted") 
+       subtitle = "The lower the standard deviation, the more likely the value is to be copy/pasted.\nCut-off is the red line.") 
 
 ```
 
@@ -1387,11 +1404,11 @@ fsc %>%
             colour = "grey",
             size = 2, 
             alpha = .4) + 
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
+  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   geom_step(size = 0.7) + 
   scale_x_date(date_breaks = "1 month", date_labels = "%b%y") +
   scale_y_continuous(labels = comma) +
-  geom_vline(colour = "blue", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
-  geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   facet_wrap(~ fct_rev(fct_reorder(org_code, cum_ben, max)), scales = "free_y") +
   theme(legend.position = "none",
         axis.text.x = element_text(size = 5, angle = 60, hjust = 1, vjust = 1),
