@@ -162,6 +162,7 @@ pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_25
 <br>
 
 
+
 ## Summary of achievements
 
 Beneficiaries of humanitarian action formed `r round(filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)`% of the `r sum(fsc$new_beneficiaries) %>% format(big.mark = ",")` beneficiaries in the first quarter of 2022. The remainder were reached through development interventions.
@@ -628,7 +629,7 @@ fsc %>%
   geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
   geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   geom_step(size = 1) + 
-  scale_x_date(date_breaks = "1 month", date_labels = "%b%y") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   scale_y_continuous(labels = comma) +
   facet_wrap(~ activity_red, scales = "free_y") +
   theme(legend.position = "none",
@@ -684,7 +685,7 @@ fsc %>%
        fill = "agricultural\nactivity",
        title = "Beneficiaries reached by agriculture and livelihoods activities") +
   scale_x_continuous(labels = comma, 
-                     breaks = c(100000, 250000, 
+                     breaks = c(100000, 
                                 500000, 1000000, 
                                 2000000, 3000000))
 
@@ -1407,7 +1408,7 @@ fsc %>%
   geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-06-01")), alpha = .5) +
   geom_vline(colour = "red", lty = 2, xintercept = as.numeric(as.Date("2022-03-01")), alpha = .5) +
   geom_step(size = 0.7) + 
-  scale_x_date(date_breaks = "1 month", date_labels = "%b%y") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b") +
   scale_y_continuous(labels = comma) +
   facet_wrap(~ fct_rev(fct_reorder(org_code, cum_ben, max)), scales = "free_y") +
   theme(legend.position = "none",
@@ -1416,7 +1417,7 @@ fsc %>%
         strip.text = element_text(size = 8, face = "bold"),
         strip.background = element_rect(fill = "#212121"),
         plot.title = element_text(size = 11)) + # see if this works when you knit, then do it for the other plots 
-  labs(x = "Date", 
+  labs(x = "Month", 
        y = "Cumulative beneficiaries", 
        title = "Monthly progress of top 12 implementing partners, 2022 Q1 & Q2", 
        subtitle = "Figures show cumulative unique beneficiaries; previous year's progress in grey") 

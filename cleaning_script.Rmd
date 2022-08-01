@@ -193,23 +193,25 @@ clean_fsc <- function(tbl) {
     filter(drop != 1) %>% select(-drop) %>%
     rename(response_plan = response_plan_if_project_under_fts) %>% 
     replace_na(list(new_beneficiaries = 0)) %>% 
-    mutate(activity_red = 
-             case_when(activity %in% 
+    mutate(activity_red = str_remove_all(activity, "provision of "),
+           activity_red = 
+             case_when(activity_red %in% 
                          c("food distributions (in kind/voucher/cash), moderate",
                            "food distributions (in kind/voucher/cash), severe") ~
                          "food distribution",
-                       activity %in% 
+                       activity_red %in% 
                          c("multi-purpose cash transfer (MPC), moderate",
                            "multi-purpose cash transfer (MPC), severe") ~
                          "multi-purpose cash transfer",
-                       activity == "livelihoods vocational training" ~ 
+                       activity_red == "livelihoods vocational training" ~ 
                          "vocational training",
-                       activity == "food/cash for work/assets" ~ 
+                       activity_red == "food/cash for work/assets" ~ 
                          "food_cash for work_assets",
-                       activity == "income-generating activities and small grants" ~ 
+                       activity_red == "income-generating activities and small grants" ~ 
                          "IGA and small grants", 
-                                    TRUE ~ activity), 
-           activity_red = str_remove_all(activity_red, "provision of ")) %>%
+                       activity_red == "HEB and fortified rice for acute emergencies" ~ 
+                         "HEB and fortfied rice", 
+                                    TRUE ~ activity_red)) %>%
     mutate(strat_obj = case_when(activity_red %in% 
                                    c("food distribution", 
                                      "multi-purpose cash transfer") &
@@ -242,7 +244,6 @@ clean_fsc <- function(tbl) {
                                                     ">=$60_<$70", ">=$70_<$80", 
                                                     ">=$80_<$90",">=$90_<$100", 
                                                     ">=$100"))) %>% 
-    mutate(usd_person_bin = round(usd_per_person, digits = 1))
     mutate(usd_person_bin = case_when(usd_per_person < 2 ~ "<$2",
                                    usd_per_person >= 2 & 
                                      usd_per_person < 4 ~ 
