@@ -1,0 +1,20 @@
+"0","fsc %>% 
+  group_by(state, township, quarter) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries), .groups = ""drop"") %>% 
+  pivot_wider(values_from = beneficiaries, names_from = quarter, 
+              values_fill = 0) %>% 
+  mutate(total = q1 + q2, 
+         pc_total = total / sum(total)) %>% 
+  mutate_at(vars(matches(""pc"")), ~ round(.x * 100, digits = 2)) %>% 
+  arrange(desc(pc_total)) %>% 
+  filter(pc_total >= 1) %>% 
+  select(state, township, Q1 = q1, Q2 = q2, 
+         Total_Jun_2022 = total, `%total` = pc_total) %>%
+  kable(caption = ""Top townships by beneficiaries reached"", 
+        format.args = list(big.mark = "","")) %>% 
+  kable_classic_2(""striped"") %>% 
+  footnote(""Only showing townships with >1% of total beneficiaries"",)
+"
+"2","Error in footnote(., ""Only showing townships with >1% of total beneficiaries"",  : 
+  footnote supports only flextable objects.
+"
