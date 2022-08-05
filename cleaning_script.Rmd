@@ -175,7 +175,8 @@ clean_fsc <- function(tbl) {
                   "township" = "township", 
                   "admin3_pcode" = "admin3_pcode", 
                   "admin1_pcode" = "admin1_pcode")) %>% 
-    mutate(total_value_usd = case_when(currency == "MMK" ~ total_value / 1776, 
+    mutate(total_value_usd = case_when(currency == "MMK" & quarter == "q1" ~ total_value / 1776, 
+                                       currency == "MMK" & quarter == "q2" ~ total_value / 1850,
                                        currency == "USD" ~ total_value)) %>% 
     rename(state = state_region, 
            admin3_pcode_old = ocha_pcode) %>%

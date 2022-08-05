@@ -1,9 +1,0 @@
-"0","fsc_raw %>%  
-  clean_fsc() %>% 
-  write_csv(""./data/fsc.csv"")
-"
-"2","Error: Problem with `mutate()` column `activity_red`.
-[34mi[39m `activity_red = str_remove_all(activity_red, ""provision of "")`.
-[31mx[39m object 'activity_red' not found
-[90mRun `rlang::last_error()` to see where the error occurred.[39m
-"
