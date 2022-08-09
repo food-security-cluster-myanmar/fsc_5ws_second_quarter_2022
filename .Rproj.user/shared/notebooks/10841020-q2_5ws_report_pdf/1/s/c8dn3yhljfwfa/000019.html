@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<style>body{background-color:white;}</style>
+<script src="lib/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="lib/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="lib/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="lib/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="lib/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="lib/kePrint-0.0.1/kePrint.js"></script>
+<link href="lib/lightable-0.0.1/lightable.css" rel="stylesheet" />
+
+</head>
+<body>
+<table class=" lightable-classic-2 lightable-striped" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;border-bottom: 0;'>
+<caption>Top townships by beneficiaries reached</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> state </th>
+   <th style="text-align:left;"> township </th>
+   <th style="text-align:right;"> Q1 </th>
+   <th style="text-align:right;"> Q2 </th>
+   <th style="text-align:right;"> Total_as_of_Q2_2022 </th>
+   <th style="text-align:right;"> %total </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Hlaingtharya (West) </td>
+   <td style="text-align:right;"> 433,074 </td>
+   <td style="text-align:right;"> 36,195 </td>
+   <td style="text-align:right;"> 469,269 </td>
+   <td style="text-align:right;"> 15.47 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Hlaingtharya (East) </td>
+   <td style="text-align:right;"> 270,646 </td>
+   <td style="text-align:right;"> 128,461 </td>
+   <td style="text-align:right;"> 399,107 </td>
+   <td style="text-align:right;"> 13.16 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Shwepyithar </td>
+   <td style="text-align:right;"> 380,512 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 380,512 </td>
+   <td style="text-align:right;"> 12.55 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> North Okkalapa </td>
+   <td style="text-align:right;"> 168,400 </td>
+   <td style="text-align:right;"> 172,559 </td>
+   <td style="text-align:right;"> 340,959 </td>
+   <td style="text-align:right;"> 11.24 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Buthidaung </td>
+   <td style="text-align:right;"> 147,534 </td>
+   <td style="text-align:right;"> 18,314 </td>
+   <td style="text-align:right;"> 165,848 </td>
+   <td style="text-align:right;"> 5.47 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Yangon </td>
+   <td style="text-align:left;"> Dala </td>
+   <td style="text-align:right;"> 81,125 </td>
+   <td style="text-align:right;"> 81,390 </td>
+   <td style="text-align:right;"> 162,515 </td>
+   <td style="text-align:right;"> 5.36 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Sittwe </td>
+   <td style="text-align:right;"> 22,484 </td>
+   <td style="text-align:right;"> 130,281 </td>
+   <td style="text-align:right;"> 152,765 </td>
+   <td style="text-align:right;"> 5.04 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kayah </td>
+   <td style="text-align:left;"> Loikaw </td>
+   <td style="text-align:right;"> 815 </td>
+   <td style="text-align:right;"> 107,473 </td>
+   <td style="text-align:right;"> 108,288 </td>
+   <td style="text-align:right;"> 3.57 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Mandalay </td>
+   <td style="text-align:left;"> Nyaung-U </td>
+   <td style="text-align:right;"> 71,547 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 71,547 </td>
+   <td style="text-align:right;"> 2.36 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Maungdaw </td>
+   <td style="text-align:right;"> 44,625 </td>
+   <td style="text-align:right;"> 22,757 </td>
+   <td style="text-align:right;"> 67,382 </td>
+   <td style="text-align:right;"> 2.22 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Mandalay </td>
+   <td style="text-align:left;"> Myingyan </td>
+   <td style="text-align:right;"> 46,087 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 46,090 </td>
+   <td style="text-align:right;"> 1.52 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kayin </td>
+   <td style="text-align:left;"> Hpapun </td>
+   <td style="text-align:right;"> 12,477 </td>
+   <td style="text-align:right;"> 29,561 </td>
+   <td style="text-align:right;"> 42,038 </td>
+   <td style="text-align:right;"> 1.39 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kayah </td>
+   <td style="text-align:left;"> Hpruso </td>
+   <td style="text-align:right;"> 26,507 </td>
+   <td style="text-align:right;"> 7,557 </td>
+   <td style="text-align:right;"> 34,064 </td>
+   <td style="text-align:right;"> 1.12 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Kachin </td>
+   <td style="text-align:left;"> Waingmaw </td>
+   <td style="text-align:right;"> 19,249 </td>
+   <td style="text-align:right;"> 14,292 </td>
+   <td style="text-align:right;"> 33,541 </td>
+   <td style="text-align:right;"> 1.11 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rakhine </td>
+   <td style="text-align:left;"> Pauktaw </td>
+   <td style="text-align:right;"> 76 </td>
+   <td style="text-align:right;"> 31,597 </td>
+   <td style="text-align:right;"> 31,673 </td>
+   <td style="text-align:right;"> 1.04 </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<sup></sup> Only showing townships with &gt;1% of total beneficiaries</td></tr></tfoot>
+</table> <script type="text/x-mathjax-config">MathJax.Hub.Config({tex2jax: {inlineMath: [["$","$"]]}})</script><script async src="https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+"0","fsc %>%  
+  mutate(so = 
+           ifelse(activity_red == ""multi-purpose cash transfer"" &
+                    humanitarian_or_development == ""Development"",
+                  ""SO3"", so),
+         humanitarian_or_development = 
+           ifelse(activity_red == ""multi-purpose cash transfer"" &
+                    humanitarian_or_development == ""Development"",
+                  ""Humanitarian"", humanitarian_or_development)
+         ) %>% 
+  filter(humanitarian_or_development == ""Development"" & activity_red != ""food distribution"") %>% 
+  group_by(so, quarter) %>% 
+  summarise(beneficiaries = sum(new_beneficiaries), .groups = ""drop"") %>% 
+  pivot_wider(names_from = quarter, 
+              values_from = beneficiaries, 
+              values_fill = 0) %>%
+  mutate(total = q1 + q2) %>% 
+  rename_all(.funs = list(str_to_title)) %>% 
+  rename(SO = So) %>%  
+  mutate(total_pc = Total / sum(Total)) %>% 
+  mutate_at(vars(total_pc), ~ round(.x * 100, digits = 2)) %>% 
+  select(SO, Q1, Q2, 
+         Total_Jun22 = Total,
+         `%_of_total` = total_pc) %>% 
+  adorn_totals(""row"") %>% 
+  mutate(`%_increase` = round((Total_Jun22 - Q1) /Q1 * 100, digits = 2)) %>%
+  kbl(caption = ""2022 development beneficiaries"", 
+        format.args = list(big.mark = "",""), 
+        boooktabs = TRUE) %>% 
+  kable_styling(latex_options = c(""HOLD_position"")) %>% 
+  kable_classic_2(""striped"")
+"
+"0",""
