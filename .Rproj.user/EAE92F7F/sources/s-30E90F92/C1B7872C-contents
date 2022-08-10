@@ -15,6 +15,17 @@ output:
 always_allow_html: yes
 ---
 
+<script>
+    $(document).ready(function() {
+      $items = $('div#TOC li');
+      $items.each(function(idx) {
+        num_ul = $(this).parentsUntil('#TOC').length;
+        $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
+      });
+
+    });
+</script>
+
 ```{css, echo=FALSE}
 
 #TOC::before {
@@ -170,7 +181,7 @@ pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_25
 
 
 
-## Summary of achievements
+## Summary of achievements 
 
 Beneficiaries of humanitarian action formed `r round(filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)`% of the `r sum(fsc$new_beneficiaries) %>% format(big.mark = ",")` beneficiaries in the first quarter of 2022. The remainder were reached through development interventions.
 
