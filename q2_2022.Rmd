@@ -898,7 +898,7 @@ fsc %>%
         strip.text = element_text(size = 8, face = "bold"),
         strip.background = element_rect(fill = "#212121")) +
   labs(x = "Delivery modality", y = "Beneficiaries",
-       title = "Delivery modalities by beneficiary type")
+       title = "Delivery modalities by location type")
   
 
 ```
