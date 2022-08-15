@@ -183,6 +183,10 @@ pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_25
 
 ## Summary of achievements 
 
+```{r overall-pc, eval=FALSE}
+filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries)} / sum(pin$fs_targeted)
+```
+
 Beneficiaries of humanitarian action formed `r round(filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)`% of the `r sum(fsc$new_beneficiaries) %>% format(big.mark = ",")` beneficiaries in the first quarter of 2022. The remainder were reached through development interventions.
 
 In this report, when beneficiaries are mentioned, the Food Security Cluster is referring to unique beneficiaries or individuals. This is different from a beneficiary frequency which is an instance of a person receiving aid i.e. a person who receives food distributions, a crop, vegetable and seed kit and farmer training would be counted as three beneficiary frequencies, but as only one beneficiary. 
@@ -279,7 +283,7 @@ fsc %>%
 
 Pertaining to the humanitarian response under the HRP, the increase between beneficiaries reached in SO1 and SO3 were 177% and 140% respectively. This is in comparison with SO2, which saw an increase of only 38% from Q1. This demonstrates that: 
 
-* The food security response to non-IDP vulnerable groups (SO2) is a well-established activity which is largely repeating the same pattern that it did in 2021. The limited number of new beneficiaries highlights that this is a routine activity mainly providing addition rounds of food assistance to persons already served in Q!. 
+* The food security response to non-IDP vulnerable groups (SO2) is a well-established activity which is largely repeating the same pattern that it did in 2021. The limited number of new beneficiaries highlights that this is a routine activity mainly providing addition rounds of food assistance to persons already served in Q1. 
 
 * The very significant progress in the number of IDPs reached by food assistance (SO1) is largely to due to FSC partners reaching many more IDPs in Rakhine State. 
 
@@ -2076,6 +2080,7 @@ fsc %>%
 
 
 ```
+
 
 
 
