@@ -1,6 +1,0 @@
-"0","filter(fsc, activity_red %in% c(ag_list)) %>% {sum(.$new_beneficiaries)} %>% format(big.mark = "","")
-"
-"1","[1]"
-"1"," ""308,403"""
-"1","
-"

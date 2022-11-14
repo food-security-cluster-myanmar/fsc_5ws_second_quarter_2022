@@ -1,6 +1,0 @@
-"0","filter(fsc, humanitarian_or_development == ""Humanitarian"") %>% {sum(.$new_beneficiaries)} / sum(pin$fs_targeted)
-"
-"1","[1]"
-"1"," 0.6699999"
-"1","
-"

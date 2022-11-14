@@ -1,59 +1,22 @@
 ---
-title: "Report on 5Ws"
-subtitle: "Second quarter 2022"
+title: "**Report on 5Ws: Mid-Year 2022**"
 author: "Myanmar Food Security Cluster"
-date: "2022-07-21"
+date: "2022/08/01"
 output:
-  html_document:
-    code_download: yes
-    theme: readable
+  pdf_document:
     toc: yes
+    number_sections: FALSE
     toc_depth: 4
-    toc_float: yes
-    number_sections: no
-    collapsed: no
 always_allow_html: yes
+urlcolor: blue
+linkcolor: red
+header-includes: 
+- \usepackage{float}
 ---
 
-<script>
-    $(document).ready(function() {
-      $items = $('div#TOC li');
-      $items.each(function(idx) {
-        num_ul = $(this).parentsUntil('#TOC').length;
-        $(this).css({'text-indent': num_ul * 10, 'padding-left': 0});
-      });
-
-    });
-</script>
-
-```{css, echo=FALSE}
-
-#TOC::before {
-  content: "";
-  display: block;
-  height: 70px;
-  margin: 2em 20px 40px 20px;
-  background-image: url("Myanmar_cluster_blue.png");
-  background-size: contain;
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-```
-
-```{=html}
-<style>
-    body .main-container {
-        max-width: 1280px;
-    }
-</style>
-```
 
 
 ```{r setup, include=FALSE}
-
-# Remember to load plyr before dplyr, if not all the important dplyr functions that you normally 
-# use will be masked. 
-
 knitr::opts_chunk$set(echo = FALSE, fig.width=9, message = FALSE, warning=FALSE)
 library(tidyverse)
 library(readxl)
@@ -75,8 +38,12 @@ library(DT)
 library(here)
 library(tidytext)
 library(ggforce)
+library(tinytex)
 
 theme_set(theme_light())
+
+# kable latex options
+options(knitr.table.format = "latex")
 
 # disabling scientific notation
 options(scipen = 100)
@@ -140,7 +107,6 @@ mode <- function(x) {
 }
 ```
 
-
 ```{r data}
 
 fsc <- read_csv("./data/fsc.csv") 
@@ -150,14 +116,13 @@ fsc_2021 <- read_csv("./data/fsc_2021.csv")
 pin <- read_csv("./data/fs_pin.csv")
 
 hd_list <- fsc %>% 
-  dplyr::group_by(humanitarian_or_development, activity_red) %>%
+  group_by(humanitarian_or_development, activity_red) %>%
   summarise(beneficiaries = sum(new_beneficiaries)) %>% 
-  
-  dplyr::mutate(hd = ifelse(humanitarian_or_development == "Humanitarian" |
+  mutate(hd = ifelse(humanitarian_or_development == "Humanitarian" |
                        activity_red == "food distribution", 
                      "Humanitarian", 
                      "Development")) %>% 
-  dplyr::mutate(humanitarian_or_development = 
+  mutate(humanitarian_or_development = 
            ifelse(activity_red == "multi-purpose cash transfer" &
                     humanitarian_or_development == "Development",
                   "Humanitarian", humanitarian_or_development)
@@ -168,14 +133,14 @@ hd_list <- fsc %>%
 
 # shapefiles
 pcode3_shape <- st_read("./mmr_polbnda_adm3_mimu_250k/mmr_polbnda_adm3_mimu_250k.shp", quiet = TRUE) %>%
-  dplyr::rename(state = ST, 
+  rename(state = ST, 
         admin1_pcode = ST_PCODE,
         township = TS,
         admin3_pcode = TS_PCODE) %>% 
  mutate(admin3_pcode = ifelse(str_detect(township, "Hlaingtharya"), "MMR013008", admin3_pcode))
 
 pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_250k.shp", quiet = TRUE) %>% 
- dplyr::rename(state = ST, 
+ rename(state = ST, 
         admin1_pcode = ST_PCODE) %>% st_as_sf()
 
 ```
@@ -187,11 +152,9 @@ pcode1_shape <- st_read("./mmr_polbnda2_adm1_mimu_250k/mmr_polbnda2_adm1_mimu_25
 
 
 
-## Summary of achievements 
+## Summary of achievements
 
-```{r overall-pc, eval=FALSE}
-filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries)} / sum(pin$fs_targeted)
-```
+This is the PDF version of the original [online report](https://food-security-cluster-myanmar.github.io/fsc_5ws_second_quarter_2022/). Online elements will only be available on the online version. 
 
 Beneficiaries of humanitarian action formed `r round(filter(fsc, humanitarian_or_development == "Humanitarian") %>% {sum(.$new_beneficiaries, na.rm = TRUE)} / sum(fsc$new_beneficiaries, na.rm = TRUE) * 100, digits = 2)`% of the `r sum(fsc$new_beneficiaries) %>% format(big.mark = ",")` beneficiaries in the first quarter of 2022. The remainder were reached through development interventions.
 
@@ -236,8 +199,8 @@ fsc %>%
   mutate(`%_increase` = round((Total_Jun22 - Q1) /Q1 * 100, digits = 2)) %>%
   kable(caption = "2022 humanitarian beneficiaries", 
         format.args = list(big.mark = ","), 
-        format = "html", 
-        table.attr = "style='width:60%;'") %>% 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
 
 ```
@@ -277,10 +240,10 @@ fsc %>%
          `%_of_total` = total_pc) %>% 
   adorn_totals("row") %>% 
   mutate(`%_increase` = round((Total_Jun22 - Q1) /Q1 * 100, digits = 2)) %>%
-  kable(caption = "2022 development beneficiaries", 
+  kbl(caption = "2022 development beneficiaries", 
         format.args = list(big.mark = ","), 
-        format = "html", 
-        table.attr = "style='width:60%;'") %>% 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
 
 ```
@@ -289,7 +252,7 @@ fsc %>%
 
 Pertaining to the humanitarian response under the HRP, the increase between beneficiaries reached in SO1 and SO3 were 177% and 140% respectively. This is in comparison with SO2, which saw an increase of only 38% from Q1. This demonstrates that: 
 
-* The food security response to non-IDP vulnerable groups (SO2) is a well-established activity which is largely repeating the same pattern that it did in 2021. The limited number of new beneficiaries highlights that this is a routine activity mainly providing addition rounds of food assistance to persons already served in Q1. 
+* The food security response to non-IDP vulnerable groups (SO2) is a well-established activity which is largely repeating the same pattern that it did in 2021. The limited number of new beneficiaries highlights that this is a routine activity mainly providing addition rounds of food assistance to persons already served in Q!. 
 
 * The very significant progress in the number of IDPs reached by food assistance (SO1) is largely to due to FSC partners reaching many more IDPs in Rakhine State. 
 
@@ -326,7 +289,10 @@ fsc %>%
   mutate(Total = Q1 + Q2, 
          `%total` = round(Total / sum(Total) * 100, digits = 2)) %>% 
   arrange(desc(Total)) %>% 
-  kable(caption = "Beneficiaries by activity, as  of 30 June 2022", format.args = list(big.mark = ",")) %>% 
+  kable(caption = "Beneficiaries by activity, as  of 30 June 2022", 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
 
 
@@ -357,7 +323,9 @@ fsc %>%
   pivot_wider(names_from = activity, values_from = beneficiaries, values_fill = 0) %>% 
   adorn_totals(c("row", "col")) %>% 
   kable(caption = "Food distributions by type food insecurity status and beneficiary type", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
 
 ```
@@ -378,12 +346,17 @@ fsc %>%
   pivot_wider(names_from = so, values_from = beneficiaries) %>% 
   mutate(total_beneficiaries = SO1 + SO2 + SO3, 
          `%_beneficiaries` = round(total_beneficiaries / sum(total_beneficiaries) * 100, digits = 2)) %>% 
-  kable(caption = "Beneficiaries by status of nutrition mainstreaming", format.args = list(big.mark = ",")) %>% 
+  kable(caption = "Beneficiaries by status of nutrition mainstreaming", 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
   
 ```
 
 <br><br><br>
+
+\newpage
 
 ## 1. Geographies
 
@@ -490,12 +463,14 @@ fsc %>%
   arrange(desc(pc_total)) %>% 
   filter(pc_total >= 1) %>% 
   select(state, township, Q1 = q1, Q2 = q2, 
-         Total_Jun_2022 = total, `%total` = pc_total) %>%
-  kable(caption = "Top townships by beneficiaries reached", 
-        format.args = list(big.mark = ",")) %>% 
+         Total_as_of_Q2_2022 = total, `%total` = pc_total) %>%
+  kbl(caption = "Top townships by beneficiaries reached", 
+        format.args = list(big.mark = ","),  
+      booktabs = TRUE) %>% 
   kable_classic_2("striped") %>% 
   footnote("Only showing townships with >1% of total beneficiaries", 
            general_title = "")
+  
 ```
 
 <br>
@@ -660,9 +635,9 @@ fsc %>%
   group_by(partners) %>% 
   summarise_at("location", n_distinct) %>%  
   kable(caption = "Number of partners by location, as of 30 June 2022", 
-        format.args = list(big.mark = ","), 
-        format = "html", 
-        table.attr = "style='width:35%;'") %>%
+        format.args = list(big.mark = ","),
+        booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
 ```
 
@@ -789,9 +764,9 @@ fsc %>%
   rename(activity = activity_red) %>% 
   kable(caption = "Beneficiaries reached by agricultural and livelihood activities", 
         format.args = list(big.mark = ","), 
-        formal = "html", 
-        table.attr = "style='width:45%;'") %>% 
+        booktabs = TRUE) %>% 
   kable_classic_2("striped") %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   footnote(general = "as of 30 June 2022", general_title = "")
 ```
 
@@ -837,6 +812,8 @@ fsc %>%
 
 <br><br>
 
+\newpage
+
 ### 2.3 Delivery modalities
 
 Only HEB and fortified rice and kitchen garden kits were delivered entirely through in-kind modalities.
@@ -875,7 +852,9 @@ fsc %>%
   mutate_at(vars(`In-kind`, `Service delivery`, `CBT/CVA`, `Hybrid`), 
             ~recode(., "-" = NA_character_)) %>% 
   kable(caption = "Percentage of beneficiaries reached by activity and delivery modality", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>%
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped") %>% 
   footnote(general = "Beneficiary totals are as of 30 June 2022", 
            general_title = "")
@@ -904,7 +883,7 @@ fsc %>%
         strip.text = element_text(size = 8, face = "bold"),
         strip.background = element_rect(fill = "#212121")) +
   labs(x = "Delivery modality", y = "Beneficiaries",
-       title = "Delivery modalities by location type")
+       title = "Delivery modalities by beneficiary type")
   
 
 ```
@@ -1027,7 +1006,7 @@ Food distributions tended to have the tightest range of values, which proves tha
 
 ```{r plotly-transfer-value-scatter, fig.height=6}
 
-money_scatter <- fsc %>% 
+fsc %>% 
   filter(!is.na(total_value_usd) & activity_red %out% c("livestock kits", 
                                                         "vocational training", 
                                                         "FFS and farmer training")) %>%
@@ -1065,9 +1044,6 @@ money_scatter <- fsc %>%
   guides(colour = guide_legend(override.aes = list(size = 1, alpha = 1))) + 
   facet_wrap(~ quarter)
 
-ggplotly(money_scatter, tooltip = c("text"), width = 820) %>% 
-  layout(title = list(text = paste0("Average USD transfer value per person in 2022 (Q1 & Q2)")))
-
 
 ```
 
@@ -1081,7 +1057,7 @@ Cash transfer values tended to be higher in Q2 as compared to Q1 largely due to 
 
 ```{r plotly-food-dist-range}
 
-food_dist_range <- fsc %>% 
+fsc %>% 
   filter(!is.na(usd_per_person)) %>%
   filter(activity_red == "food distribution" & usd_per_person < 60) %>% 
   ggplot(aes(x = usd_per_person, y = state, colour = state, 
@@ -1095,19 +1071,11 @@ food_dist_range <- fsc %>%
   geom_jitter(alpha = 0.3, aes(size = beneficiaries)) +
   scale_colour_viridis_d() +
   scale_size_continuous(range = c(0.3, 10)) +
-  scale_x_continuous(breaks = c(0, 3, 10, 20, 30, 50), labels = dollar_format(accuracy = 1), 
-                     trans = "log10") +
+  scale_x_continuous(breaks = seq(0, 90, by = 10), labels = dollar_format(accuracy = 1)) +
   labs(x = "USD value per person", 
        y = "", 
        title = "Food distribution: range of USD values per person by state in 2022/Q1",
        size = "", colour = "") 
-
-ggplotly(food_dist_range, tooltip = c("text"), width = 820, height =  600) %>% 
-  layout(title = list(text = paste0("Food distribution: range of USD values per person by state in 2022 (Q1 & Q2)",
-                                    "<br>",
-                                    "<sup>",
-                                    "The red line is 50% of 1/5 of food MEB; double-click on legend to select","</sup>")), 
-         legend = list(font = list(size = 7))) 
 ```
 
 <br>
@@ -1151,8 +1119,11 @@ fsc %>%
             avg_usd_month = round(mean(usd_per_person, na.rm = TRUE), digits = 2),
             beneficiaries = round(sum(new_beneficiaries))) %>% 
   mutate(pc_of_hhd = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
-  kable(caption = "USD values of food distributions by percentage of MEB received", format.args = list(big.mark = ",")) %>% 
+  kable(caption = "USD values of food distributions by percentage of MEB received", 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
   kable_classic_2("striped") %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   column_spec(5, color = "white", background = spec_color(food_bins$pc_of_total[1:11], end = 0.9, direction = -1)) %>%
   footnote(general = "Only persons reached through CBT/CVA/hybrid modalities are included",
            general_title = "")
@@ -1161,6 +1132,8 @@ fsc %>%
 ```
 
 <br><br>
+
+\newpage
 
 ### 3.4 Implementing partners
 
@@ -1217,6 +1190,8 @@ fsc %>% partner_mean_usd("IGA and small grants") +
 
 <br><br><br>
 
+\newpage
+
 ## 4. Partners
 
 A total of 71 partners have reported into the Food Security Cluster as of Q2 2022 -- there are 48 implementing partners and 23 reporting partners. 
@@ -1261,8 +1236,8 @@ fsc %>% group_by(report_org_code) %>%
   rename(implementing_partners = count) %>% 
   filter(implementing_partners > 2) %>% 
   kable(caption = "Reporting organisations with the most implementing partners", 
-        format = "html", 
-        table.attr = "style='width:45%;'") %>% 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped") %>% 
   footnote(general = "All others had 1 or 2 implementing partners", 
            general_title = "")
@@ -1276,22 +1251,10 @@ The interactive plot below shows the number of beneficiaries and townships reach
 
 <br>
 
-
-
 ```{r plotly-partner-scatter}
 
-partner_ben <- fsc %>% 
-  group_by(org_code) %>% 
-  summarise(beneficiaries = sum(new_beneficiaries)) %>% 
-  {mean(.$beneficiaries, na.rm = TRUE)}
-
-partner_tsp <- fsc %>% 
-  group_by(org_code) %>% 
-  summarise(townships = n_distinct(admin3_pcode)) %>% 
-  {mean(.$townships, na.rm = TRUE)}
-
-
-partner_scatter <- fsc %>%  
+# Median values are x = 5671 and y = 3. Currently using mean. 
+fsc %>%  
   group_by(org_code) %>% 
   summarise(states = n_distinct(state), 
             townships = n_distinct(admin3_pcode), 
@@ -1301,8 +1264,8 @@ partner_scatter <- fsc %>%
                            "states: ", states, "\n", 
                            "townships: ", townships, "\n", 
                            "beneficiaries: ", comma(beneficiaries, accuracy = 1)))) + 
-  geom_vline(xintercept = partner_ben, lty = 2, colour = "red") + 
-  geom_hline(yintercept = partner_tsp, lty = 2, colour = "red") + 
+  geom_vline(xintercept = 48145.33, lty = 2, colour = "red") + 
+  geom_hline(yintercept = 4.555556, lty = 2, colour = "red") + 
   geom_point(aes(size = beneficiaries), alpha = .7) + 
   scale_x_continuous(trans = "log", labels = comma, breaks = c(0, 100, 300, 1000, 3000, 10000, 30000, 100000, 300000)) +
   scale_y_continuous(breaks = seq(0, 25, 5)) +
@@ -1311,13 +1274,6 @@ partner_scatter <- fsc %>%
        title = "Plot of beneficiaries and townships reached, by implementing partner") +
   theme(legend.position = "none")
 
-ggplotly(partner_scatter, tooltip = c("text"), width = 820) %>%
-  config(displayModeBar = FALSE) %>% 
-  layout(title = list(text = paste0("Beneficiaries and townships reached, by implementing partner",
-                                    "<br>", 
-                                    "<sup>",
-                                    "mouse over for details; sizes indicate beneficiaries reached; red lines are means",
-                                    "</sup>")))
 
 # Make a comparison with Q1
 ```
@@ -1420,7 +1376,9 @@ fsc %>%
   select(org_code, ben_q1, rank_q1, ben_q2, rank_q2, total_ben) %>% 
   head(15) %>% 
   kable(caption = "Top implementing partners by beneficiaries reached in 2022, as of 30 June 2022", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","),
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped") 
 ```
 
@@ -1443,7 +1401,9 @@ fsc %>%
   arrange(desc(report_orgs)) %>%
   head(15) %>% 
   kable(caption = "Organisations supported and geographic reach by donor", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped", full_width = FALSE) %>% 
   footnote(general = "Only showing donors supporting more than one reporting partner.", 
            general_title = "")
@@ -1463,7 +1423,9 @@ fsc %>%
             implementing_partners = n_distinct(org_code)) %>% 
   arrange(desc(donors)) %>% 
   kable(caption = "Number of donors by state", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped", full_width = FALSE) 
 
 ```
@@ -1486,8 +1448,9 @@ fsc %>%
   arrange(desc(`%_beneficiaries`)) %>% 
   head(15) %>% 
   kable(caption = "Top donors by beneficiaries reached", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), booktabs = TRUE) %>% 
   kable_classic_2("striped", full_width = FALSE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   footnote("Donors starting with 'org_xxxx' are partners using their own organisational funds", 
            general_title = "",
            threeparttable = TRUE)
@@ -1509,11 +1472,15 @@ fsc %>%
   arrange(desc(beneficiaries)) %>% 
   filter(beneficiaries > 0) %>% 
   kable(caption = "Reported beneficiaries with missing donor data", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped", full_width = FALSE)
 ```
 
 <br><br><br>
+
+\newpage
 
 ## 5. Beneficiaries
 
@@ -1601,8 +1568,8 @@ fsc %>%
   filter(food_insecurity_status == "NA") %>% 
   kable(caption = "Missing food insecurity data of beneficiaries, as of 30 June 2022", 
         format.args = list(big.mark = ","), 
-        format = "html", 
-        table.attr = "style='width:80%;'") %>% 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
 ```
 
@@ -1631,7 +1598,9 @@ fsc %>%
   mutate(`%_beneficiaries` = round(beneficiaries / sum(beneficiaries) * 100, digits = 2)) %>% 
   arrange(desc(beneficiaries)) %>% 
   kable(caption = "Evidence of food insecurity status, as of 30 June 2022", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped", full_width = FALSE)
 ```
 
@@ -1770,7 +1739,6 @@ fsc_disagg %>%
 
 <br><br><br>
 
-
 ## 6. Comparison with targets
 
 ### 6.1 Reached vs target by township
@@ -1786,7 +1754,7 @@ The 13 townships along the extreme left side of the plot have beneficiaries but 
 
 ```{r plotly-tsp-comparison-reached-target}
 
-ben_target <- fsc %>% 
+fsc %>% 
   group_by(admin3_pcode_old) %>% 
   summarise(beneficiaries = sum(new_beneficiaries),
             partners = n_distinct(org_code)) %>% 
@@ -1805,8 +1773,6 @@ ben_target <- fsc %>%
                            "% of target: ", percent(reached_pc, accuracy = 2), "\n", 
                            "partners: ", partners))) + 
   geom_abline(intercept = 0, slope = 1, lty = 2, colour = "red") + 
-  geom_abline(intercept = .5, slope = 1, lty = 2, colour = "grey", size = .4) + 
-  geom_abline(intercept = -.5, slope = 1, lty = 2, colour = "grey", size = .4) + 
   geom_point(aes(size = beneficiaries), alpha = 0.8) +
   scale_size_continuous(guide = "none") + 
   scale_x_continuous(trans = "log10", labels = comma) + 
@@ -1816,14 +1782,6 @@ ben_target <- fsc %>%
        title = "Beneficiaries reached vs targeted population by township, Q1 2022",
        subtitle = "The red line is 100% of target") + 
   theme(legend.title = element_text(size = 7))
-
-ggplotly(ben_target, tooltip = c("text"), width = 820, height = 500) %>% 
-  config(displayModeBar = FALSE) %>% 
-  layout(title = list(text = paste0("Beneficiaries vs target by township, as of Q2 2022",
-                                    "<br>",
-                                    "<sup>",
-                                    "The red line is 100% of target; size indicates number of beneficiaries","</sup>")), 
-         legend = list(font = list(size = 7)))
 
 ```
 
@@ -1836,7 +1794,7 @@ When compared to the results for Q1 2022, it is clear that the areas which alrea
 
 ```{r plotly-tsp-comparison-reached-target-2021}
 
-ben_target <- fsc %>% 
+fsc %>% 
   filter(quarter == "q1") %>% 
   group_by(admin3_pcode_old) %>% 
   summarise(beneficiaries = sum(new_beneficiaries),
@@ -1856,8 +1814,6 @@ ben_target <- fsc %>%
                            "% of target: ", percent(reached_pc, accuracy = 2), "\n", 
                            "partners: ", partners))) + 
   geom_abline(intercept = 0, slope = 1, lty = 2, colour = "red") + 
-  geom_abline(intercept = .5, slope = 1, lty = 2, colour = "grey", size = .4) + 
-  geom_abline(intercept = -.5, slope = 1, lty = 2, colour = "grey", size = .4) + 
   geom_point(aes(size = beneficiaries), alpha = 0.8) +
   scale_size_continuous(guide = "none") + 
   scale_x_continuous(trans = "log10", labels = comma) + 
@@ -1868,13 +1824,6 @@ ben_target <- fsc %>%
        subtitle = "The red line is 100% of target") + 
   theme(legend.title = element_text(size = 7))
 
-ggplotly(ben_target, tooltip = c("text"), width = 820, height = 500) %>% 
-  config(displayModeBar = FALSE) %>% 
-  layout(title = list(text = paste0("Beneficiaries reached vs targeted population by township, Q1 2022",
-                                    "<br>",
-                                    "<sup>",
-                                    "The red line is 100% of target; size indicates number of beneficiaries","</sup>")), 
-         legend = list(font = list(size = 7)))
 
 ```
 
@@ -1907,7 +1856,9 @@ fsc %>%
   select(state, township, Q1 = q1, Q2 = q2, 
          beneficiaries, target, gap) %>% 
   kable(caption = "Top 15 most overreached townships", 
-        format.args = list(big.mark = ",")) %>% 
+        format.args = list(big.mark = ","), 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2()
   
   
@@ -1965,9 +1916,9 @@ fsc %>%
   filter(!is.na(range)) %>% 
   select(category, range, townships_Q1, townships_as_of_Q2_2022 = townships_Q2) %>%
   arrange(category) %>% 
-  kable(caption = "Townships by percentage of target reached",
-        format = "html", 
-        table.attr = "style='width:70%;'") %>% 
+  kable(caption = "Townships by percentage of target reached", 
+        booktabs = TRUE) %>% 
+  kable_styling(latex_options = c("HOLD_position")) %>% 
   kable_classic_2("striped")
   
   
@@ -2072,7 +2023,7 @@ pin %>%
 
 ### 6.3 Interactive reference table
 
-In the interactive table below, is a list of townships sorted by the gap between the targeted population and beneficiaries reached in 2022. Any of the columns can be sort; the search bars above each column can also assist in filtering.
+In the interactive table below, is a list of townships sorted by the gap between the targeted population and beneficiaries reached in 2022. Any of the columns can be sort; the search bars above each column can also assist in filtering. Please use the [online version](https://food-security-cluster-myanmar.github.io/fsc_5ws_second_quarter_2022/) of this report for the interactive table. 
 
 <br>
 
@@ -2103,7 +2054,3 @@ fsc %>%
 
 
 ```
-
-
-
-

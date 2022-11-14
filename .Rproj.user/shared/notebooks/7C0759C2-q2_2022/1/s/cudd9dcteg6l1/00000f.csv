@@ -1,4 +1,0 @@
-"0","activity_list <- fsc %>% "
-"0","  sum_ben2(quarter, activity_red) %>% "
-"0","  group_by(quarter) %>% "
-"0","  mutate(pc = round(beneficiaries / sum(beneficiaries) * 100, digits = 2))"
